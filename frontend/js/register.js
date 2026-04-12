@@ -8,8 +8,9 @@ let generatedOTP = "";
 let timerInterval;
 let currentFormData = null;
 
+console.log("Registration system ready!");
+
 function checkHospitalEmail() {
-//   console.log("HELLO FROM REGISTER");
   const email = document.getElementById("hospitalEmail").value;
   const match = email.match(/@(.+)$/);
   if (match && match[1].toLowerCase() === "gmail.com") {
@@ -212,80 +213,80 @@ function getFormData() {
 }
 
 async function saveToDatabase(data) {
-    console.log("hello from db")
-//   try {
-//     let { data: existingHospital, error: checkError } = await supabase
-//       .from("hospitals")
-//       .select("id")
-//       .eq("email", data.hospital.email)
-//       .maybeSingle();
+  console.log("hello from db");
+  //   try {
+  //     let { data: existingHospital, error: checkError } = await supabase
+  //       .from("hospitals")
+  //       .select("id")
+  //       .eq("email", data.hospital.email)
+  //       .maybeSingle();
 
-//     if (checkError) throw checkError;
+  //     if (checkError) throw checkError;
 
-//     let hospitalId;
+  //     let hospitalId;
 
-//     if (existingHospital) {
-//       hospitalId = existingHospital.id;
-//     } else {
-//       const { data: hospital, error: hErr } = await supabase
-//         .from("hospitals")
-//         .insert({
-//           name: data.hospital.name,
-//           email: data.hospital.email,
-//           phone: data.hospital.phone,
-//           address: data.hospital.address,
-//           city: data.hospital.city,
-//           state: data.hospital.state,
-//           postal_code: data.hospital.postal_code,
-//           country: data.hospital.country,
-//           type: data.hospital.type,
-//           size: data.hospital.size,
-//           license_number: data.hospital.license,
-//           year_established: data.hospital.year,
-//           emergency_phone: data.hospital.emergency,
-//           status: "active",
-//           created_at: new Date().toISOString(),
-//         })
-//         .select()
-//         .single();
+  //     if (existingHospital) {
+  //       hospitalId = existingHospital.id;
+  //     } else {
+  //       const { data: hospital, error: hErr } = await supabase
+  //         .from("hospitals")
+  //         .insert({
+  //           name: data.hospital.name,
+  //           email: data.hospital.email,
+  //           phone: data.hospital.phone,
+  //           address: data.hospital.address,
+  //           city: data.hospital.city,
+  //           state: data.hospital.state,
+  //           postal_code: data.hospital.postal_code,
+  //           country: data.hospital.country,
+  //           type: data.hospital.type,
+  //           size: data.hospital.size,
+  //           license_number: data.hospital.license,
+  //           year_established: data.hospital.year,
+  //           emergency_phone: data.hospital.emergency,
+  //           status: "active",
+  //           created_at: new Date().toISOString(),
+  //         })
+  //         .select()
+  //         .single();
 
-//       if (hErr) throw hErr;
-//       hospitalId = hospital.id;
-//     }
+  //       if (hErr) throw hErr;
+  //       hospitalId = hospital.id;
+  //     }
 
-//     let { data: existingUser, error: userCheckError } = await supabase
-//       .from("users")
-//       .select("id")
-//       .eq("email", data.admin.email)
-//       .maybeSingle();
+  //     let { data: existingUser, error: userCheckError } = await supabase
+  //       .from("users")
+  //       .select("id")
+  //       .eq("email", data.admin.email)
+  //       .maybeSingle();
 
-//     if (userCheckError) throw userCheckError;
+  //     if (userCheckError) throw userCheckError;
 
-//     if (existingUser) {
-//       throw new Error("User already registered! Please login.");
-//     }
+  //     if (existingUser) {
+  //       throw new Error("User already registered! Please login.");
+  //     }
 
-//     const { error: uErr } = await supabase.from("users").insert({
-//       hospital_id: hospitalId,
-//       full_name: data.admin.fullName,
-//       email: data.admin.email,
-//       password_hash: btoa(data.security.password),
-//       username: data.security.username,
-//       role: "super_admin",
-//       department: data.admin.department,
-//       phone: data.admin.phone,
-//       license_number: data.admin.license,
-//       is_active: true,
-//       created_at: new Date().toISOString(),
-//     });
+  //     const { error: uErr } = await supabase.from("users").insert({
+  //       hospital_id: hospitalId,
+  //       full_name: data.admin.fullName,
+  //       email: data.admin.email,
+  //       password_hash: btoa(data.security.password),
+  //       username: data.security.username,
+  //       role: "super_admin",
+  //       department: data.admin.department,
+  //       phone: data.admin.phone,
+  //       license_number: data.admin.license,
+  //       is_active: true,
+  //       created_at: new Date().toISOString(),
+  //     });
 
-//     if (uErr) throw uErr;
+  //     if (uErr) throw uErr;
 
-//     return { success: true };
-//   } catch (error) {
-//     console.error("Database error:", error);
-//     return { success: false, error: error.message };
-//   }
+  //     return { success: true };
+  //   } catch (error) {
+  //     console.error("Database error:", error);
+  //     return { success: false, error: error.message };
+  //   }
 }
 
 function sendOTP(email) {
@@ -361,18 +362,20 @@ async function verifyOTP() {
 }
 
 function resendOTP() {
-  const email = document.getElementById("adminEmail").value;
-  generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-  alert(`📧 New code sent to: ${email}\n\nYour new OTP is: ${generatedOTP}`);
-  for (let i = 1; i <= 6; i++) document.getElementById("code" + i).value = "";
-  document.getElementById("code1").focus();
+    console.log("hello from resendOTP")
+//   const email = document.getElementById("adminEmail").value;
+//   generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+//   alert(`📧 New code sent to: ${email}\n\nYour new OTP is: ${generatedOTP}`);
+//   for (let i = 1; i <= 6; i++) document.getElementById("code" + i).value = "";
+//   document.getElementById("code1").focus();
 }
 
 async function submitRegistration() {
   if (!validateAll()) return;
   currentFormData = getFormData();
-  sendOTP(currentFormData.admin.email);
-  showVerificationSection(currentFormData.admin.email);
+  console.log(currentFormData);
+  //   sendOTP(currentFormData.admin.email);
+  //   showVerificationSection(currentFormData.admin.email);
 }
 
 // Test Mode: Ctrl+Shift+E
@@ -424,5 +427,3 @@ document.addEventListener("keydown", function (e) {
     alert("✅ Test data loaded! Click Complete Registration.");
   }
 });
-
-console.log("Registration system ready!");
