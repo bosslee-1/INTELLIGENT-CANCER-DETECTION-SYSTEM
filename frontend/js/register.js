@@ -362,26 +362,26 @@ async function verifyOTP() {
 }
 
 function resendOTP() {
-    console.log("hello from resendOTP")
-//   const email = document.getElementById("adminEmail").value;
-//   generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-//   alert(`📧 New code sent to: ${email}\n\nYour new OTP is: ${generatedOTP}`);
-//   for (let i = 1; i <= 6; i++) document.getElementById("code" + i).value = "";
-//   document.getElementById("code1").focus();
+  console.log("hello from resendOTP");
+  //   const email = document.getElementById("adminEmail").value;
+  //   generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+  //   alert(`📧 New code sent to: ${email}\n\nYour new OTP is: ${generatedOTP}`);
+  //   for (let i = 1; i <= 6; i++) document.getElementById("code" + i).value = "";
+  //   document.getElementById("code1").focus();
 }
 
 async function submitRegistration() {
   if (!validateAll()) return;
   const data = getFormData();
+  console.log(data);
   const res = await fetch("http://localhost:5000/api/auth/register", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify(data)
-  })
-  const result = await res.json()
-  console.log(data);
+    body: JSON.stringify(data),
+  });
+  const result = await res.json();
   if (result.success) {
     alert("✅ Registration successful");
   } else {

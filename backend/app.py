@@ -281,34 +281,20 @@ ICDS - Backend with Supabase PostgreSQL
 
 
 
-from flask import Flask, send_from_directory
+from flask import Flask
 from flask_cors import CORS
-import os
 
-from routes import register_routes
 
 app = Flask(__name__)
 CORS(app)
 
-# Register routes
-register_routes(app)
+# Register Routes
+app.register_blueprint(auth_bp,url_prefix="/api/auth")
+# same as app.use("/api/auth", authRouter)
 
-# Serve frontend
-FRONT_DIR = "../frontend"
 
-@app.route("/")
-def index():
-    return send_from_directory(FRONT_DIR, "index.html")
-
-@app.route("/<path:path>")
-def static_files(path):
-    return send_from_directory(FRONT_DIR, path)
-
-if __name__ == "__main__":
+if __name__== "__main__":
     app.run(debug=True)
-
-
-
 
 
 

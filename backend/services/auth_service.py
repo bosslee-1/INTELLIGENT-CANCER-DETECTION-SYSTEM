@@ -1,6 +1,12 @@
 from flask import jsonify
+from supabase import create_client
 from config.supabase_client import supabase
 import hashlib
+
+SUPABASE_URL = "https://tgrrmzusqjzzvhevmmbt.supabase.co"
+SUPABASE_KEY = "your-key"
+
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def login_user(data):
     try:
@@ -23,3 +29,15 @@ def login_user(data):
 
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+    
+def create_user(data):
+    try:
+        
+
+
+
+    except Exception as e:
+        return jsonify({
+            "success":False,
+            "error":str(e)
+        })

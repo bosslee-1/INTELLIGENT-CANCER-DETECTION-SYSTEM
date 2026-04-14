@@ -27,7 +27,7 @@ def get_db_connection():
     return conn
 
 
-def init_database():
+def initialize_database():
     """Create all necessary tables in Supabase"""
     conn = get_db_connection()
     cur = conn.cursor()
@@ -35,34 +35,41 @@ def init_database():
     print("Creating all tables if they dont exists....")
 
     # 1. Hospital Table
-    cur.execute(
-        """
+    cur.execute("""
         CREATE TABLE IF NOT EXISTS hospital (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
             email TEXT,
+            license_number TEXT,
             hospital_type TEXT,
             address TEXT,
+            city TEXT,
+            state TEXT,
+            postal_code TEXT,
+            country TEXT,
+            phone TEXT,
             verified BOOLEAN DEFAULT true,
             active BOOLEAN DEFAULT true,
-            created_at TIMESTAMPTZ DEFAULT NOW()
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            updated_at TIMESTAMPTZ DEFAULT NOW()
         )
-    """
-    )
-
+    """)
     # 2. User Table (Doctors & Admins)
     cur.execute(
         """
-        CREATE TABLE IF NOT EXISTS "user" (
+        CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
+            hospital_id TEXT REFERENCES hospital(id) ON DELETE CASCADE,
+            full_name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password_hash TEXT NOT NULL,
-            name TEXT,
             role TEXT DEFAULT 'doctor',
-            hospital_id TEXT REFERENCES hospital(id),
+            department TEXT,
+            phone TEXT,
             active BOOLEAN DEFAULT true,
             last_login TIMESTAMPTZ,
-            created_at TIMESTAMPTZ DEFAULT NOW()
+            created_at TIMESTAMPTZ DEFAULT NOW(),
+            updated_at TIMESTAMPTZ DEFAULT NOW()
         )
     """
     )

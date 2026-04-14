@@ -1,0 +1,11 @@
+Final Structure (Recommended)
+textbackend/
+├── db/
+│   ├── __init__.py
+│   ├── config.py              # ← Connection pool (like config.db.js)
+│   ├── hospital_queries.py    # All hospital operations
+│   ├── user_queries.py        # All user operations (admin, doctor, etc.)
+│   ├── patient_queries.py
+│   ├── assessment_queries.py
+│   └── otp_queries.py
+└── ...
