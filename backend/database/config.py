@@ -1,3 +1,6 @@
+
+''' ICDS - Database Configuration '''
+
 """This is the central db connection"""
 
 import os
@@ -46,4 +49,4 @@ def query(sql: str, params=None):
         raise e
     finally:
         cursor.close()
-        conn.close
+        conn.close()

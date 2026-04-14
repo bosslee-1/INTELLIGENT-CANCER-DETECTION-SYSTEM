@@ -1,4 +1,3 @@
-
 import hashlib
 import datetime
 
@@ -6,14 +5,35 @@ from backend.database.config import query
 
 # ====================== USER QUERIES ======================
 
-def create_user(full_name, email, password_hash, hospital_id, role="super_admin", department=None, phone=None):
+
+def register_user_query(
+    full_name,
+    email,
+    password_hash,
+    hospital_id,
+    role="super_admin",
+    department=None,
+    phone=None,
+):
     """Create new user"""
     sql = """
         INSERT INTO users (hospital_id, full_name, email, password_hash, role, department, phone, created_at)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         RETURNING id, full_name, email, role, hospital_id, created_at
     """
-    result = query(sql, [hospital_id, full_name, email, password_hash, role, department, phone, datetime.datetime.utcnow().isoformat()])
+    result = query(
+        sql,
+        [
+            hospital_id,
+            full_name,
+            email,
+            password_hash,
+            role,
+            department,
+            phone,
+            datetime.datetime.utcnow().isoformat(),
+        ],
+    )
     return result[0] if result else None
 
 

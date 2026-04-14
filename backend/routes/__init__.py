@@ -1,5 +1,5 @@
 from .health import health_bp
-from .auth import auth_bp
+from .auth_routes import auth_bp
 from .ml import ml_bp
 
 

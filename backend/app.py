@@ -2,8 +2,6 @@
 ICDS - Backend with Supabase PostgreSQL
 """
 
-
-
 # warnings.filterwarnings("ignore")
 
 # from flask import Flask, request, jsonify, send_from_directory
@@ -278,23 +276,29 @@ ICDS - Backend with Supabase PostgreSQL
 #     app.run(debug=True, host="0.0.0.0", port=5000)
 
 
-
-
-
 from flask import Flask
 from flask_cors import CORS
+from backend.database.init_database import initialize_database
+from backend.routes import register_routes
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app)  # Allow frontend to connect
 
-# Register Routes
-app.register_blueprint(auth_bp,url_prefix="/api/auth")
+
+# ======================
+# Initialize Database
+# ======================
+initialize_database()
+
+# ======================
+# Register Blueprints (routes)
+# ======================
+
+register_routes(app)
 # same as app.use("/api/auth", authRouter)
 
 
-if __name__== "__main__":
-    app.run(debug=True)
-
-
-
+if __name__ == "__main__":
+    print("🚀 ICDS Backend Server Starting...")
+    app.run(debug=True, host="0.0.0.0", port=5000)

@@ -2,29 +2,18 @@
 
 
 """
-ICDS - Database Configuration
-Use DATABASE_URL in .env for PostgreSQL in production.
+This is for initializing all tables!
 """
 
 
-import os
-import psycopg2
+
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 from datetime import datetime
+from backend.database.config import get_db_connection
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-
-def get_db_connection():
-    """Connect to Supabase PostgreSQL"""
-    if not DATABASE_URL:
-        raise Exception("❌ DATABASE_URL is not set in .env file")
-
-    conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
-    return conn
 
 
 def initialize_database():
@@ -35,7 +24,8 @@ def initialize_database():
     print("Creating all tables if they dont exists....")
 
     # 1. Hospital Table
-    cur.execute("""
+    cur.execute(
+        """
         CREATE TABLE IF NOT EXISTS hospital (
             id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
@@ -53,7 +43,8 @@ def initialize_database():
             created_at TIMESTAMPTZ DEFAULT NOW(),
             updated_at TIMESTAMPTZ DEFAULT NOW()
         )
-    """)
+    """
+    )
     # 2. User Table (Doctors & Admins)
     cur.execute(
         """
@@ -96,7 +87,7 @@ def initialize_database():
             id TEXT PRIMARY KEY,
             hospital_id TEXT REFERENCES hospital(id),
             patient_id TEXT REFERENCES patient(id),
-            doctor_id TEXT REFERENCES "user"(id),
+            doctor_id TEXT REFERENCES users(id),
             risk_level TEXT,          -- HIGH, MEDIUM, LOW
             confidence FLOAT,
             cancer_type TEXT,

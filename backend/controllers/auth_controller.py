@@ -1,12 +1,13 @@
 from flask import jsonify, request
 
-from backend.services.auth_service import create_user
+from backend.database.user_queries import register_user_query
+
 
 
 def register_user():
     try:
         data = request.get_json()
-        result = create_user(data)
+        result = register_user_query(data)
         if result["success"]:
             return jsonify(result),201
         else:
