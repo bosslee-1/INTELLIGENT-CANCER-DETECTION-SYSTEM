@@ -55,9 +55,61 @@ def register_user():
 
         return (
             jsonify(
-                {"success": True, "message": "Registration successful", "user": user,"hospital": hospital_result}
+                {
+                    "success": True,
+                    "message": "Registration successful",
+                    "user": user,
+                    "hospital": hospital_result,
+                }
             ),
             201,
+        )
+
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+def login_user():
+    try:
+        data = request.get_json()
+        email = data.get("email")
+        password = data.get("password")
+
+        # 1 Checking if user exists
+        user = get_user_by_email(email)
+        if not user:
+            return (
+                jsonify({"success": False, "error": "Invalid email or password"}),
+                401,
+            )
+
+        # 2 Hash the incoming password
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+
+        # 3 compare the passwords
+
+        if user["password_hash"] != password_hash:
+            return (
+                jsonify({"success": False, "error": "Invalid email or password"}),
+                401,
+            )
+
+        # 4 login success
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "message": "Login successful",
+                    "user": {
+                        "id": user["id"],
+                        "email": user["email"],
+                        "full_name": user["full_name"],
+                        "role": user["role"],
+                        "hospital_id": user["hospital_id"],
+                    },
+                }
+            ),
+            200,
         )
 
     except Exception as e:

@@ -283,7 +283,17 @@ from routes import register_routes
 
 
 app = Flask(__name__)
-CORS(app)  # Allow frontend to connect
+
+# ======================
+# CORS Configuration (Very Important!)
+# ======================
+CORS(
+    app,
+    origins=["http://localhost:5500", "http://127.0.0.1:5500", "http://localhost:3000"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
+    supports_credentials=True,
+)
 
 
 # ======================
@@ -304,7 +314,9 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("🚀 ICDS Backend Server Starting...")
     print("=" * 60)
-    print("\n🔧 Loading ML Model...")
+    print("📍 Test URLs:")
+    print("   → Health Check : http://localhost:5000/api/health")
+    print("   → Register     : http://localhost:5000/api/auth/register-hospital")
     print("\n" + "=" * 60)
 
     app.run(debug=True, host="0.0.0.0", port=5000)
