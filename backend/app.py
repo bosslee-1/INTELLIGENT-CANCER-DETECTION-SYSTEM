@@ -278,8 +278,8 @@ ICDS - Backend with Supabase PostgreSQL
 
 from flask import Flask
 from flask_cors import CORS
-from backend.database.init_database import initialize_database
-from backend.routes import register_routes
+from database.init_database import initialize_database
+from routes import register_routes
 
 
 app = Flask(__name__)
@@ -300,5 +300,11 @@ register_routes(app)
 
 
 if __name__ == "__main__":
+
+    print("\n" + "=" * 60)
     print("🚀 ICDS Backend Server Starting...")
+    print("=" * 60)
+    print("\n🔧 Loading ML Model...")
+    print("\n" + "=" * 60)
+
     app.run(debug=True, host="0.0.0.0", port=5000)

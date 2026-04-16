@@ -1,9 +1,10 @@
-'''
+"""
 This is a Health Check Endpoint.
 It's a small API route that tells whether the backend server is alive and running.
 
-'''
-from datetime import datetime
+"""
+
+import datetime
 
 from flask import Blueprint, jsonify
 

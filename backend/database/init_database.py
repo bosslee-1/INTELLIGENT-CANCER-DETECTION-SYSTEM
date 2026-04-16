@@ -10,7 +10,7 @@ This is for initializing all tables!
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 from datetime import datetime
-from backend.database.config import get_db_connection
+from database.config import get_db_connection
 
 load_dotenv()
 

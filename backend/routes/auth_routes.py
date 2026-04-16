@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from backend.controllers.auth_controller import register_user
+from controllers.auth_controller import register_user
 
 
 auth_bp = Blueprint("auth", __name__)

@@ -1,12 +1,13 @@
 import hashlib
 import datetime
 
-from backend.database.config import query
+from database.config import query
 
 # ====================== USER QUERIES ======================
 
 
-def register_user_query(
+def create_user(
+    user_id,
     full_name,
     email,
     password_hash,
@@ -17,13 +18,14 @@ def register_user_query(
 ):
     """Create new user"""
     sql = """
-        INSERT INTO users (hospital_id, full_name, email, password_hash, role, department, phone, created_at)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO users (id , hospital_id, full_name, email, password_hash, role, department, phone, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
         RETURNING id, full_name, email, role, hospital_id, created_at
     """
     result = query(
         sql,
         [
+            user_id,
             hospital_id,
             full_name,
             email,

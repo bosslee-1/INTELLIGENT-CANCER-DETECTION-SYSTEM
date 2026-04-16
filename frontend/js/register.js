@@ -374,7 +374,7 @@ async function submitRegistration() {
   if (!validateAll()) return;
   const data = getFormData();
   console.log(data);
-  const res = await fetch("http://localhost:5000/api/auth/register", {
+  const res = await fetch("http://localhost:5000/api/auth", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
