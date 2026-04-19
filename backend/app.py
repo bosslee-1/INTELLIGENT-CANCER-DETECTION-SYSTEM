@@ -314,9 +314,6 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("🚀 ICDS Backend Server Starting...")
     print("=" * 60)
-    print("📍 Test URLs:")
-    print("   → Health Check : http://localhost:5000/api/health")
-    print("   → Register     : http://localhost:5000/api/auth/register-hospital")
     print("\n" + "=" * 60)
 
     app.run(debug=True, host="0.0.0.0", port=5000)

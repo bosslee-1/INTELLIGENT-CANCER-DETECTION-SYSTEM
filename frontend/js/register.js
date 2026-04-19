@@ -385,12 +385,21 @@ async function submitRegistration() {
   //   body: JSON.stringify(data),
   // });
 
-  const res = await api.post(API_PATHS.AUTH.REGISTER, JSON.stringify(data));
-  const result = await res.json();
-  if (result.success) {
-    alert("✅ Registration successful");
-  } else {
-    alert("❌ " + result.error);
+  try {
+    const res = await api.post(API_PATHS.AUTH.REGISTER, data);
+    const result = res.data;
+    if (result.success) {
+      alert("✅ Registration successful");
+    } else {
+      alert("❌ " + result.error);
+    }
+  } catch (error) {
+    // console.error(error);
+    if (error.response) {
+      alert("❌ " + error.response.data.error);
+    } else {
+      alert("❌ Network error");
+    }
   }
   //   sendOTP(currentFormData.admin.email);
   //   showVerificationSection(currentFormData.admin.email);
@@ -445,3 +454,4 @@ document.addEventListener("keydown", function (e) {
     alert("✅ Test data loaded! Click Complete Registration.");
   }
 });
+window.submitRegistration = submitRegistration;
