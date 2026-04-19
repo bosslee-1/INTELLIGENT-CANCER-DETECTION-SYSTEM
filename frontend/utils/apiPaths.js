@@ -8,7 +8,7 @@ export const API_PATHS = {
   DASHBOARD_DATA: {
     DASHBOARD: (hospitalId) => `/dashboard/${hospitalId}`,
     RECENT_ASSESSMENTS: (hospitalId) =>
-      `/api/dashboard/${hospitalId}/recent-assessments`,
-    ALERTS: (hospitalId) => `/api/dashboard/${hospitalId}/alerts`,
+      `/dashboard/${hospitalId}/recent-assessments`,
+    ALERTS: (hospitalId) => `/dashboard/${hospitalId}/alerts`,
   },
 };
