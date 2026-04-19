@@ -5,4 +5,10 @@ export const API_PATHS = {
     LOGIN: "/auth/login",
     REGISTER: "/auth/register",
   },
+  DASHBOARD_DATA: {
+    DASHBOARD: (hospitalId) => `/dashboard/${hospitalId}`,
+    RECENT_ASSESSMENTS: (hospitalId) =>
+      `/api/dashboard/${hospitalId}/recent-assessments`,
+    ALERTS: (hospitalId) => `/api/dashboard/${hospitalId}/alerts`,
+  },
 };

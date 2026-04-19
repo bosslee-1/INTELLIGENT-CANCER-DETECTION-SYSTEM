@@ -1,13 +1,5 @@
-// ====================================
-// SUPABASE CONFIGURATION
-// ====================================
-
-const SUPABASE_URL = "https://tgrrmzusqjzzvhevmmbt.supabase.co";
-const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRncnJtenVzcWp6enZoZXZtbWJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyOTg4NDUsImV4cCI6MjA5MDg3NDg0NX0.nmD117ohEA-pMV4YnNluPxJGT4N-HFJxPaRRyGFyyks";
-
-// Initialize Supabase client
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+import { API_PATHS } from "../utils/apiPaths";
+import api from "../utils/axiosInstance";
 
 // Global variables
 let cancerChart = null;
@@ -18,10 +10,23 @@ let currentHospitalId = null;
 window.onload = async function () {
   checkAuth();
   await loadUserData();
-  await loadDashboardData();
-  await loadRecentAssessments();
-  await loadAlerts();
+
+  await Promise.all([
+    loadDashboardData(),
+    loadRecentAssessments(),
+    loadAlerts(),
+  ]);
 };
+
+document.addEventListener("DOMContentLoaded", () => {
+  document
+    .getElementById("toggleSidebarBtn")
+    .addEventListener("click", toggleSidebar);
+});
+
+function getHospitalId() {
+  return localStorage.getItem("icds_hospital_id");
+}
 
 // Check if user is authenticated
 function checkAuth() {
@@ -34,7 +39,7 @@ function checkAuth() {
 // Load user data from localStorage and Supabase
 async function loadUserData() {
   const userId = localStorage.getItem("icds_user_id");
-  const hospitalId = localStorage.getItem("icds_hospital_id");
+  const hospitalId = getHospitalId();
   const name = localStorage.getItem("icds_user_name");
   const email = localStorage.getItem("icds_user_email");
   const hospital = localStorage.getItem("icds_hospital");
@@ -63,7 +68,7 @@ async function loadUserData() {
 
 // Load all dashboard statistics
 async function loadDashboardData() {
-  const hospitalId = localStorage.getItem("icds_hospital_id");
+  const hospitalId = getHospitalId();
 
   if (!hospitalId) {
     console.log("No hospital ID found");
@@ -71,72 +76,34 @@ async function loadDashboardData() {
   }
 
   try {
-    // Get today's date range
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    // CALLING FLASK BACKEND
+    const res = await api.get(API_PATHS.DASHBOARD_DATA.DASHBOARD(hospitalId));
 
-    // Fetch assessments for this hospital
-    const { data: assessments, error: assessmentsError } = await supabase
-      .from("assessments")
-      .select(
-        `
-                        id,
-                        status,
-                        created_at,
-                        predictions (
-                            top_cancer_type,
-                            top_probability
-                        )
-                    `,
-      )
-      .eq("hospital_id", hospitalId);
+    const result = res.data;
 
-    if (assessmentsError) throw assessmentsError;
+    if (!result.success) {
+      throw new Error("Backend error");
+    }
 
-    // Count assessments today
-    const todayAssessments =
-      assessments?.filter((a) => {
-        const date = new Date(a.created_at);
-        return date >= today && date < tomorrow;
-      }).length || 0;
+    const assessments = result.assessments;
 
-    // Count high risk cases (probability > 70%)
-    const highRisk =
-      assessments?.filter(
-        (a) => a.predictions && a.predictions.top_probability > 70,
-      ).length || 0;
+    // ✅ UI updates
+    document.getElementById("assessmentsToday").textContent =
+      result.todayAssessments;
 
-    // Count cancers detected (completed assessments with predictions)
-    const cancersDetected =
-      assessments?.filter((a) => a.status === "completed" && a.predictions)
-        .length || 0;
+    document.getElementById("highRiskCases").textContent = result.highRisk;
 
-    // Count active doctors
-    const { data: doctors, error: doctorsError } = await supabase
-      .from("users")
-      .select("id", { count: "exact" })
-      .eq("hospital_id", hospitalId)
-      .eq("is_active", true)
-      .in("role", ["doctor", "super_admin", "admin"]);
+    document.getElementById("cancerDetected").textContent =
+      result.cancersDetected;
 
-    if (doctorsError) throw doctorsError;
+    document.getElementById("activeDoctors").textContent = result.activeDoctors;
 
-    // Update stats display
-    document.getElementById("assessmentsToday").textContent = todayAssessments;
-    document.getElementById("highRiskCases").textContent = highRisk;
-    document.getElementById("cancerDetected").textContent = cancersDetected;
-    document.getElementById("activeDoctors").textContent = doctors?.length || 0;
-
-    // Load charts
     await loadCancerChart(assessments);
     await loadRiskChart(assessments);
   } catch (error) {
     console.error("Error loading dashboard data:", error);
   }
 }
-
 // Load cancer detection chart
 async function loadCancerChart(assessments) {
   if (!assessments || assessments.length === 0) {
@@ -264,191 +231,97 @@ async function loadRiskChart(assessments) {
 
 // Load recent assessments
 async function loadRecentAssessments() {
-  const hospitalId = localStorage.getItem("icds_hospital_id");
+  const hospitalId = getHospitalId();
   const tbody = document.getElementById("assessmentsTableBody");
 
-  if (!hospitalId) {
-    tbody.innerHTML = `
-                    <tr><td colspan="8" class="empty-table">
-                        <i class="fas fa-hospital"></i>
-                        <p>No hospital associated with your account</p>
-                    </td></tr>
-                `;
-    return;
-  }
-
   try {
-    const { data: assessments, error } = await supabase
-      .from("assessments")
-      .select(
-        `
-                        id,
-                        status,
-                        symptoms,
-                        risk_factors,
-                        created_at,
-                        patients (
-                            first_name,
-                            last_name,
-                            age,
-                            gender
-                        ),
-                        users (
-                            full_name
-                        ),
-                        predictions (
-                            top_cancer_type,
-                            top_probability
-                        )
-                    `,
-      )
-      .eq("hospital_id", hospitalId)
-      .order("created_at", { ascending: false })
-      .limit(10);
+    const res = await api.get(
+      API_PATHS.DASHBOARD_DATA.RECENT_ASSESSMENTS(hospitalId),
+    );
 
-    if (error) throw error;
+    const result = res.data;
 
-    if (!assessments || assessments.length === 0) {
+    if (
+      !result.success ||
+      !Array.isArray(result.assessments) ||
+      result.assessments.length === 0
+    ) {
       tbody.innerHTML = `
-                        <tr><td colspan="8" class="empty-table">
-                            <i class="fas fa-folder-open"></i>
-                            <p>No assessments found</p>
-                            <p style="font-size: 12px;">Create your first patient assessment to see data here</p>
-                            <button class="quick-action-btn" onclick="newAssessment()" style="margin-top: 15px; background: var(--primary); color: white;">
-                                <i class="fas fa-plus-circle"></i> New Assessment
-                            </button>
-                        </td></tr>
-                    `;
+        <tr><td colspan="8">No assessments found</td></tr>
+      `;
       return;
     }
 
-    tbody.innerHTML = assessments
+    tbody.innerHTML = result.assessments
       .map((assessment) => {
         const patient = assessment.patients;
         const doctor = assessment.users;
         const prediction = assessment.predictions;
-        const createdDate = new Date(
-          assessment.created_at,
-        ).toLocaleDateString();
 
-        const riskLevel =
+        const date = new Date(assessment.created_at).toLocaleDateString();
+
+        const risk =
           prediction?.top_probability > 70
             ? "High"
             : prediction?.top_probability > 40
               ? "Medium"
               : "Low";
-        const riskClass =
-          riskLevel === "High"
-            ? "risk-high"
-            : riskLevel === "Medium"
-              ? "risk-medium"
-              : "risk-low";
-
-        const symptomsList =
-          assessment.symptoms?.slice(0, 2).join(", ") || "No symptoms";
-        const symptomsDisplay =
-          symptomsList + (assessment.symptoms?.length > 2 ? "..." : "");
 
         return `
-                        <tr>
-                            <td>${patient?.first_name || "Unknown"} ${patient?.last_name || ""}</td>
-                            <td>${patient?.age || "?"}/${patient?.gender || "?"}</td>
-                            <td>${symptomsDisplay}</td>
-                            <td class="${riskClass}">${riskLevel}</td>
-                            <td>${prediction?.top_cancer_type || "Pending"}</td>
-                            <td>${doctor?.full_name || "Unknown"}</td>
-                            <td>${createdDate}</td>
-                            <td>
-                                <button class="quick-action-btn" onclick="viewAssessment('${assessment.id}')" style="padding: 5px 10px; font-size: 12px;">
-                                    <i class="fas fa-eye"></i> View
-                                </button>
-                            </td>
-                        </tr>
-                    `;
+        <tr>
+          <td>${patient?.first_name || "Unknown"} ${patient?.last_name || ""}</td>
+          <td>${patient?.age || "?"}/${patient?.gender || "?"}</td>
+          <td>${assessment.symptoms?.slice(0, 2).join(", ") || "No symptoms"}</td>
+          <td>${risk}</td>
+          <td>${prediction?.top_cancer_type || "Pending"}</td>
+          <td>${doctor?.full_name || "Unknown"}</td>
+          <td>${date}</td>
+        </tr>
+      `;
       })
       .join("");
-  } catch (error) {
-    console.error("Error loading assessments:", error);
-    tbody.innerHTML = `
-                    <tr><td colspan="8" class="empty-table">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>Error loading assessments</p>
-                        <p style="font-size: 12px;">Please refresh the page</p>
-                    </td></tr>
-                `;
+  } catch (err) {
+    console.error("Recent assessments error:", err);
   }
 }
-
 // Load alerts
 async function loadAlerts() {
-  const hospitalId = localStorage.getItem("icds_hospital_id");
-
-  if (!hospitalId) return;
+  const hospitalId = getHospitalId();
 
   try {
-    // Get high risk assessments from last 7 days
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const res = await api.get(API_PATHS.DASHBOARD_DATA.ALERTS(hospitalId));
 
-    const { data: highRiskAssessments, error } = await supabase
-      .from("assessments")
-      .select(
-        `
-                        id,
-                        created_at,
-                        patients (first_name, last_name),
-                        predictions (top_probability, top_cancer_type)
-                    `,
-      )
-      .eq("hospital_id", hospitalId)
-      .gte("created_at", sevenDaysAgo.toISOString());
+    const result = res.data;
+    const container = document.getElementById("urgentAlertsContainer");
 
-    if (error) throw error;
-
-    const urgentAlerts =
-      highRiskAssessments?.filter(
-        (a) => a.predictions && a.predictions.top_probability > 70,
-      ) || [];
-
-    const alertsContainer = document.getElementById("urgentAlertsContainer");
-
-    if (urgentAlerts.length === 0) {
-      alertsContainer.innerHTML = `
-                        <div class="empty-alert">
-                            <i class="fas fa-check-circle" style="color: var(--success);"></i>
-                            <p>No urgent alerts</p>
-                            <p style="font-size: 12px;">All clear</p>
-                        </div>
-                    `;
-    } else {
-      alertsContainer.innerHTML = urgentAlerts
-        .slice(0, 5)
-        .map((alert) => {
-          const patientName = alert.patients
-            ? `${alert.patients.first_name} ${alert.patients.last_name}`
-            : "Unknown";
-          const date = new Date(alert.created_at).toLocaleDateString();
-          return `
-                            <div class="alert-item danger">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <div class="alert-content">
-                                    <div class="alert-title">High Risk: ${alert.predictions.top_cancer_type}</div>
-                                    <div>Patient: ${patientName} (${alert.predictions.top_probability}% probability)</div>
-                                    <div class="alert-time">${date}</div>
-                                </div>
-                            </div>
-                        `;
-        })
-        .join("");
+    if (!result.success || result.alerts.length === 0) {
+      container.innerHTML = `
+        <div>No urgent alerts</div>
+      `;
+      return;
     }
 
-    // Update notification badge
-    document.getElementById("notificationBadge").textContent =
-      urgentAlerts.length;
-    document.getElementById("notificationBadge").style.display =
-      urgentAlerts.length > 0 ? "inline-block" : "none";
-  } catch (error) {
-    console.error("Error loading alerts:", error);
+    container.innerHTML = result.alerts
+      .map((alert) => {
+        const patient = alert.patients;
+        const date = new Date(alert.created_at).toLocaleDateString();
+
+        return `
+        <div class="alert-item danger">
+          <div>
+            <b>${alert.predictions.top_cancer_type}</b><br/>
+            ${patient?.first_name || ""} ${patient?.last_name || ""}<br/>
+            ${alert.predictions.top_probability}% risk
+            <small>${date}</small>
+          </div>
+        </div>
+      `;
+      })
+      .join("");
+
+    document.getElementById("notificationBadge").textContent = result.count;
+  } catch (err) {
+    console.error("Alerts error:", err);
   }
 }
 
@@ -532,4 +405,10 @@ window.addEventListener("resize", function () {
   }
 });
 
-console.log("ICDS Dashboard - Connected to Supabase Database");
+window.toggleSidebar = toggleSidebar;
+// window.logout = logout;
+// window.newAssessment = newAssessment;
+// window.viewReports = viewReports;
+// window.showNotifications = showNotifications;
+// window.closeNotifications = closeNotifications;
+// window.toggleUserMenu = toggleUserMenu;

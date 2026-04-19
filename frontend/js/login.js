@@ -48,7 +48,7 @@ async function handleLogin(event) {
       password: password,
     });
 
-    const data =  response.data;
+    const data = response.data;
 
     if (data.success) {
       // Login successful
@@ -77,7 +77,7 @@ async function handleLogin(event) {
       }
 
       setTimeout(() => {
-        window.location.href = "dashboard.html";
+        window.location.href = "../pages/dashboard.html";
       }, 1500);
     } else {
       showAlert("error", data.error || "Invalid email or password");
