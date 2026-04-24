@@ -1,6 +1,7 @@
 import datetime
 from database.config import query
 
+
 # ======================
 # CREATE HOSPITAL
 # ======================
@@ -14,30 +15,45 @@ def create_hospital(
     state,
     postal_code,
     country,
-    hospital_type
+    hospital_type,
+    license_number=None,
 ):
     sql = """
         INSERT INTO hospital (
-            id, name, email, phone, address, city, state,
-            postal_code, country, hospital_type, created_at
+            id,
+            name,
+            email,
+            license_number,
+            hospital_type,
+            address,
+            city,
+            state,
+            postal_code,
+            country,
+            phone,
+            created_at
         )
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
         RETURNING *
     """
 
-    result = query(sql, [
-        hospital_id,
-        name,
-        email,
-        phone,
-        address,
-        city,
-        state,
-        postal_code,
-        country,
-        hospital_type,
-        datetime.datetime.utcnow()
-    ])
+    result = query(
+        sql,
+        [
+            hospital_id,
+            name,
+            email,
+            license_number,
+            hospital_type,
+            address,
+            city,
+            state,
+            postal_code,
+            country,
+            phone,
+            datetime.datetime.utcnow(),
+        ],
+    )
 
     return result[0] if result else None
 
@@ -81,7 +97,7 @@ def update_hospital(
     state=None,
     postal_code=None,
     country=None,
-    hospital_type=None
+    hospital_type=None,
 ):
     sql = """
         UPDATE hospital SET
@@ -99,19 +115,22 @@ def update_hospital(
         RETURNING *
     """
 
-    result = query(sql, [
-        name,
-        email,
-        phone,
-        address,
-        city,
-        state,
-        postal_code,
-        country,
-        hospital_type,
-        datetime.datetime.utcnow(),
-        hospital_id
-    ])
+    result = query(
+        sql,
+        [
+            name,
+            email,
+            phone,
+            address,
+            city,
+            state,
+            postal_code,
+            country,
+            hospital_type,
+            datetime.datetime.utcnow(),
+            hospital_id,
+        ],
+    )
 
     return result[0] if result else None
 

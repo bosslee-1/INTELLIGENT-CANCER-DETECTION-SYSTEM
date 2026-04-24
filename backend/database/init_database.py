@@ -6,14 +6,12 @@ This is for initializing all tables!
 """
 
 
-
 from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 from datetime import datetime
 from database.config import get_db_connection
 
 load_dotenv()
-
 
 
 def initialize_database():
@@ -45,6 +43,7 @@ def initialize_database():
         )
     """
     )
+
     # 2. User Table (Doctors & Admins)
     cur.execute(
         """
