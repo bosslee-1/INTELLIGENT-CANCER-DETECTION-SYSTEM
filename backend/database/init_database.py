@@ -128,8 +128,134 @@ def initialize_database():
     """
     )
 
+    # =========================
+    # INDEXES (PERFORMANCE)
+    # =========================
+
+    cur.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_assessment_hospital 
+        ON assessment(hospital_id);
+    """
+    )
+
+    cur.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_assessment_created 
+        ON assessment(created_at);
+    """
+    )
+
+    cur.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_patient_hospital 
+        ON patient(hospital_id);
+    """
+    )
+
+    cur.execute(
+        """
+        CREATE INDEX IF NOT EXISTS idx_assessment_hospital_created 
+        ON assessment(hospital_id, created_at DESC);
+    """
+    )
+
     conn.commit()
     cur.close()
     conn.close()
 
     print("✅ All Supabase tables created successfully!")
+
+
+# function for db seeding
+def seed_database():
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    print("🌱 Seeding database...")
+
+    # =========================
+    # 1. HOSPITAL
+    # =========================
+    cur.execute(
+        """
+        INSERT INTO hospital (id, name, email, hospital_type, city, country, phone)
+        VALUES 
+        ('hosp_1', 'Nairobi General Hospital', 'info@nairobigh.com', 'public', 'Nairobi', 'Kenya', '0712345678')
+        ON CONFLICT (id) DO NOTHING;
+    """
+    )
+
+    # =========================
+    # 2. USERS (DOCTORS)
+    # =========================
+    cur.execute(
+        """
+        INSERT INTO users (id, hospital_id, full_name, email, password_hash, role, department)
+        VALUES
+        ('doc_1', 'hosp_1', 'Dr. John Smith', 'john@hospital.com', 'hashedpass', 'doctor', 'Oncology'),
+        ('doc_2', 'hosp_1', 'Dr. Alice Wanjiku', 'alice@hospital.com', 'hashedpass', 'doctor', 'Radiology')
+        ON CONFLICT (id) DO NOTHING;
+    """
+    )
+
+    # =========================
+    # 3. PATIENTS
+    # =========================
+    cur.execute(
+        """
+        INSERT INTO patient (id, hospital_id, full_name, age, gender, contact)
+        VALUES
+        ('pat_1', 'hosp_1', 'Peter Mwangi', 45, 'Male', '0700000001'),
+        ('pat_2', 'hosp_1', 'Mary Atieno', 38, 'Female', '0700000002'),
+        ('pat_3', 'hosp_1', 'James Otieno', 60, 'Male', '0700000003'),
+        ('pat_4', 'hosp_1', 'Faith Njeri', 29, 'Female', '0700000004')
+        ON CONFLICT (id) DO NOTHING;
+    """
+    )
+
+    # =========================
+    # 4. ASSESSMENTS
+    # =========================
+    cur.execute(
+        """
+        INSERT INTO assessment (
+            id, hospital_id, patient_id, doctor_id,
+            risk_level, confidence, cancer_type, symptoms_json
+        )
+        VALUES
+        ('assess_1', 'hosp_1', 'pat_1', 'doc_1', 'HIGH', 0.92, 'Lung Cancer', '{"cough": true, "chest_pain": true}'),
+        ('assess_2', 'hosp_1', 'pat_2', 'doc_2', 'LOW', 0.30, NULL, '{"fatigue": true}'),
+        ('assess_3', 'hosp_1', 'pat_3', 'doc_1', 'MEDIUM', 0.65, 'Colon Cancer', '{"weight_loss": true}'),
+        ('assess_4', 'hosp_1', 'pat_4', 'doc_2', 'HIGH', 0.88, 'Breast Cancer', '{"lump": true}'),
+        ('assess_5', 'hosp_1', 'pat_1', 'doc_2', 'LOW', 0.20, NULL, '{"headache": true}')
+        ON CONFLICT (id) DO NOTHING;
+    """
+    )
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    print("✅ Seed data inserted successfully!")
+
+
+# function to drop all tables
+def reset_database():
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    print("⚠️ Dropping all tables...")
+
+    cur.execute("DROP TABLE IF EXISTS assessment CASCADE;")
+    cur.execute("DROP TABLE IF EXISTS patient CASCADE;")
+    cur.execute("DROP TABLE IF EXISTS users CASCADE;")
+    cur.execute("DROP TABLE IF EXISTS hospital CASCADE;")
+    cur.execute("DROP TABLE IF EXISTS otp_code CASCADE;")
+    cur.execute("DROP TABLE IF EXISTS audit_log CASCADE;")
+
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    print("✅ All tables dropped!")

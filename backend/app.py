@@ -276,9 +276,11 @@ ICDS - Backend with Supabase PostgreSQL
 #     app.run(debug=True, host="0.0.0.0", port=5000)
 
 
+import os
+
 from flask import Flask
 from flask_cors import CORS
-from database.init_database import initialize_database
+from database.init_database import initialize_database, reset_database, seed_database
 from routes import register_routes
 
 
@@ -302,7 +304,11 @@ CORS(
 # ======================
 # Initialize Database
 # ======================
-initialize_database()
+if os.getenv("RESET_DB") == "true":
+    reset_database()
+    initialize_database()
+    seed_database()
+
 
 # ======================
 # Register Blueprints (routes)
