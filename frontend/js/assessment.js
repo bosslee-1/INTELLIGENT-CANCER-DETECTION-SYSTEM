@@ -418,6 +418,8 @@ async function saveAssessment() {
       created_at: new Date().toISOString(),
     }));
 
+    // correct code
+
     if (symptomsToSave.length > 0) {
       const { error: symptomsError } = await supabase
         .from("symptoms")
